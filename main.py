@@ -1,55 +1,62 @@
 # job_search_auto_apply/main.py
 
 import argparse
+from flask import Flask, render_template, request, jsonify
 from modules.location import get_coordinates, get_nearby_companies
 from modules.jobs import find_remote_jobs, search_career_pages, filter_jobs_by_keywords
 from modules.apply import auto_apply_jobs
 from modules.utils import load_user_config
 
+app = Flask(__name__)
 
-def main():
-    parser = argparse.ArgumentParser(description="Find and apply to local & remote IT jobs.")
-    parser.add_argument("zip_code", help="Your ZIP code (e.g., 32563)")
-    parser.add_argument("--radius", type=int, default=30, help="Driving distance radius in miles")
-    parser.add_argument("--keywords", nargs="+", default=["Python", "DevOps", "Tableau"], help="IT keywords to match")
-    parser.add_argument("--remote", action="store_true", help="Include remote job search")
-    parser.add_argument("--auto_apply", action="store_true", help="Auto-apply to matched jobs")
+@app.route('/')
+def home():
+    return render_template('index.html')
 
-    args = parser.parse_args()
+@app.route('/job_search', methods=['POST'])
+def job_search():
+    # Get input data from form submission
+    zip_code = request.form.get('zip_code')
+    radius = int(request.form.get('radius', 30))
+    keywords = request.form.getlist('keywords')
+    remote = 'remote' in request.form
+    auto_apply = 'auto_apply' in request.form
+
+    # Load user configuration
     config = load_user_config()
 
-    print(f"Getting coordinates for ZIP code {args.zip_code}...")
-    lat, lon = get_coordinates(args.zip_code)
+    # Get coordinates for the provided ZIP code
+    lat, lon = get_coordinates(zip_code)
 
-    print("Searching for nearby companies...")
-    companies = get_nearby_companies(lat, lon, args.radius)
+    # Search for nearby companies
+    companies = get_nearby_companies(lat, lon, radius)
 
     all_jobs = []
 
-    if args.remote:
-        print("Searching for remote jobs...")
-        all_jobs += find_remote_jobs(args.keywords)
+    # Search for remote jobs
+    if remote:
+        all_jobs += find_remote_jobs(keywords)
 
+    # Search local job listings if companies are found
     if companies:
-        print("Searching local career pages...")
         local_jobs = search_career_pages(companies)
         all_jobs += local_jobs
     else:
         print("No companies found within radius.")
 
-    print("Filtering jobs by keywords...")
-    matched_jobs = filter_jobs_by_keywords(all_jobs, args.keywords)
+    # Filter jobs by the specified keywords
+    matched_jobs = filter_jobs_by_keywords(all_jobs, keywords)
 
-    for job in matched_jobs:
-        print(f"Found job: {job['title']} at {job['company']} - {job['url']}")
-
-    if args.auto_apply:
-        print("Attempting to auto-apply to matched jobs...")
+    # Optionally, auto-apply to matched jobs
+    if auto_apply:
         auto_apply_jobs(matched_jobs, config)
 
+    # Return results to the user
+    return render_template('results.html', jobs=matched_jobs)
 
 if __name__ == "__main__":
-    main()
+    app.run(debug=True)
+
 
 
 # This script is designed to be run from the command line. It takes a ZIP code and optional parameters for radius, keywords, remote job search, and auto-apply functionality.
