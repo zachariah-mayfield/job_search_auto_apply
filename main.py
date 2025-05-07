@@ -7,55 +7,98 @@ from modules.jobs import find_remote_jobs, search_career_pages, filter_jobs_by_k
 from modules.apply import auto_apply_jobs
 from modules.utils import load_user_config
 
+# Initialize Flask app
 app = Flask(__name__)
 
+# Serve the index.html page
 @app.route('/')
-def home():
+def index():
     return render_template('index.html')
 
-@app.route('/job_search', methods=['POST'])
-def job_search():
-    # Get input data from form submission
-    zip_code = request.form.get('zip_code')
-    radius = int(request.form.get('radius', 30))
-    keywords = request.form.getlist('keywords')
-    remote = 'remote' in request.form
-    auto_apply = 'auto_apply' in request.form
-
-    # Load user configuration
-    config = load_user_config()
-
-    # Get coordinates for the provided ZIP code
+# Handle job search request
+@app.route('/search_jobs', methods=['POST'])
+def search_jobs():
+    data = request.get_json()
+    
+    zip_code = data['zip_code']
+    radius = data['radius']
+    keywords = data['keywords']
+    remote = data['remote']
+    auto_apply = data['auto_apply']
+    
+    # Getting coordinates based on ZIP code
+    print(f"Getting coordinates for ZIP code {zip_code}...")
     lat, lon = get_coordinates(zip_code)
 
-    # Search for nearby companies
+    # Searching for nearby companies
+    print("Searching for nearby companies...")
     companies = get_nearby_companies(lat, lon, radius)
 
     all_jobs = []
 
-    # Search for remote jobs
     if remote:
+        print("Searching for remote jobs...")
         all_jobs += find_remote_jobs(keywords)
 
-    # Search local job listings if companies are found
     if companies:
+        print("Searching local career pages...")
         local_jobs = search_career_pages(companies)
         all_jobs += local_jobs
     else:
         print("No companies found within radius.")
 
-    # Filter jobs by the specified keywords
+    # Filtering jobs by keywords
+    print("Filtering jobs by keywords...")
     matched_jobs = filter_jobs_by_keywords(all_jobs, keywords)
 
-    # Optionally, auto-apply to matched jobs
-    if auto_apply:
+    # Returning job results as JSON
+    return jsonify(matched_jobs)
+
+# Main function for command-line arguments and auto-apply
+def main():
+    parser = argparse.ArgumentParser(description="Find and apply to local & remote IT jobs.")
+    parser.add_argument("zip_code", help="Your ZIP code (e.g., 32563)")
+    parser.add_argument("--radius", type=int, default=30, help="Driving distance radius in miles")
+    parser.add_argument("--keywords", nargs="+", default=["Python", "DevOps", "Tableau"], help="IT keywords to match")
+    parser.add_argument("--remote", action="store_true", help="Include remote job search")
+    parser.add_argument("--auto_apply", action="store_true", help="Auto-apply to matched jobs")
+
+    args = parser.parse_args()
+    config = load_user_config()
+
+    print(f"Getting coordinates for ZIP code {args.zip_code}...")
+    lat, lon = get_coordinates(args.zip_code)
+
+    print("Searching for nearby companies...")
+    companies = get_nearby_companies(lat, lon, args.radius)
+
+    all_jobs = []
+
+    if args.remote:
+        print("Searching for remote jobs...")
+        all_jobs += find_remote_jobs(args.keywords)
+
+    if companies:
+        print("Searching local career pages...")
+        local_jobs = search_career_pages(companies)
+        all_jobs += local_jobs
+    else:
+        print("No companies found within radius.")
+
+    print("Filtering jobs by keywords...")
+    matched_jobs = filter_jobs_by_keywords(all_jobs, args.keywords)
+
+    for job in matched_jobs:
+        print(f"Found job: {job['title']} at {job['company']} - {job['url']}")
+
+    if args.auto_apply:
+        print("Attempting to auto-apply to matched jobs...")
         auto_apply_jobs(matched_jobs, config)
 
-    # Return results to the user
-    return render_template('results.html', jobs=matched_jobs)
 
 if __name__ == "__main__":
     app.run(debug=True)
+
 
 
 
