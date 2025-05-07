@@ -2,39 +2,52 @@
 # modules/jobs.py
 # -----------------------------
 
+import json
 import requests
+from pathlib import Path
+
+CONFIG_FILE = Path("company_config.json")
+
+def load_company_config():
+    if CONFIG_FILE.exists():
+        with open(CONFIG_FILE, "r") as f:
+            return json.load(f).get("companies", [])
+    return []
 
 def find_remote_jobs(keywords):
-    # Placeholder API call for remote jobs search
-    return [{"title": f"{kw} Remote Job", "company": "RemoteCo"} for kw in keywords]
+    query = "+".join(keywords)
+    url = f"https://remotive.io/api/remote-jobs?search={query}"
+    try:
+        response = requests.get(url)
+        data = response.json()
+        jobs = [
+            {
+                "title": job["title"],
+                "company": job["company_name"],
+                "url": job["url"]
+            }
+            for job in data.get("jobs", [])
+        ]
+        return jobs
+    except Exception as e:
+        print(f"Error fetching remote jobs: {e}")
+        return []
 
-def search_career_pages(companies):
-    # Placeholder search for career pages on company websites
-    return [{"title": f"Job at {company}", "company": company} for company in companies]
+def search_career_pages():
+    companies = load_company_config()
+    # Placeholder logic — simulate a job from each company
+    return [
+        {
+            "title": f"Job at {company['name']}",
+            "company": company["name"],
+            "url": company["url"]
+        }
+        for company in companies
+    ]
 
 def filter_jobs_by_keywords(jobs, keywords):
-    filtered_jobs = [job for job in jobs if any(kw.lower() in job['title'].lower() for kw in keywords)]
-    return filtered_jobs
-
-
-
-### OLD CODE ###
-
-# import re
-
-# def find_remote_jobs(keywords):
-#     return [
-#         {"title": "Remote DevOps Engineer", "company": "RemoteCo", "url": "https://remoteco.com/jobs/devops"},
-#     ]
-
-# def search_career_pages(companies):
-#     # Simulate job listings
-#     return [
-#         {"title": "IT Support Analyst", "company": company['name'], "url": company['url'] + "/job1"}
-#         for company in companies
-#     ]
-
-# def filter_jobs_by_keywords(jobs, keywords):
-#     return [job for job in jobs if any(re.search(k, job['title'], re.IGNORECASE) for k in keywords)]
-
-### OLD CODE ###
+    filtered = []
+    for job in jobs:
+        if any(kw.lower() in job["title"].lower() for kw in keywords):
+            filtered.append(job)
+    return filtered

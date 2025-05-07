@@ -16,10 +16,12 @@ fi
 
 # Activate the virtual environment
 echo "Activating virtual environment..."
-source venv/bin/activate
+source venv/Scripts/activate
 
 # Install dependencies from requirements.txt
 echo "Installing dependencies..."
 pip install -r requirements.txt
 
 echo "Setup complete! Virtual environment is ready."
+
+flask run

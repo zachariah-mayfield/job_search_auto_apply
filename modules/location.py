@@ -5,11 +5,17 @@
 import requests
 
 def get_coordinates(zip_code):
-    # Assume a service like Google Maps API to get coordinates from a zip code
-    response = requests.get(f"https://api.example.com/geocode?zip={zip_code}")
-    response.raise_for_status()
-    data = response.json()
-    return data['lat'], data['lon']
+    print(f"Getting coordinates for ZIP code {zip_code}...")
+    response = requests.get(f"http://api.zippopotam.us/us/{zip_code}")
+    
+    if response.status_code == 200:
+        data = response.json()
+        lat = float(data['places'][0]['latitude'])
+        lon = float(data['places'][0]['longitude'])
+        return lat, lon
+    else:
+        raise ValueError("Failed to get coordinates for ZIP code")
+
 
 def get_nearby_companies(lat, lon, radius):
     # Dummy implementation, you could use a company data API
