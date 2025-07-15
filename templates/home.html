@@ -1,0 +1,46 @@
+<!-- templates/home.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Search Auto-Apply</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container">
+    <header class="py-4">
+        <h1 class="display-4">Job Search Auto-Apply</h1>
+        <p class="lead">Automate your job search and application process with ease.</p>
+    </header>
+
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <h3>Search Jobs</h3>
+            <form action="/search_jobs" method="get">
+                <div class="mb-3">
+                    <label for="keywords" class="form-label">Keywords</label>
+                    <input type="text" class="form-control" name="keywords" id="keywords" placeholder="Enter job keywords" required>
+                </div>
+                <div class="mb-3">
+                    <label for="zipCode" class="form-label">ZIP Code</label>
+                    <input type="text" class="form-control" name="zipCode" id="zipCode" placeholder="Enter your ZIP Code" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Search Jobs</button>
+            </form>
+        </div>
+        <div class="col-md-6 mb-4">
+            <h3>Manage Companies</h3>
+            <p>Want to add a company to the list? <a href="/edit_companies">Edit Companies</a></p>
+        </div>
+    </div>
+
+    <footer class="mt-5">
+        <p class="text-center">&copy; 2025 Job Search Auto-Apply. All rights reserved.</p>
+    </footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

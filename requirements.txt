@@ -1,0 +1,22 @@
+# Core app dependencies
+fastapi
+uvicorn[standard]
+flask
+click
+python-dotenv
+
+# Scraping and automation
+requests
+beautifulsoup4
+selenium
+playwright
+
+# Data handling and validation
+pydantic
+geopy
+
+# Optional: For better async job handling in FastAPI (safe without greenlet)
+httpx
+
+# Dev and tooling
+python-multipart  # Needed for FastAPI file uploads (if added later)

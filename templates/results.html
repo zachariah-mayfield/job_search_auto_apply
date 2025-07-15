@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Search Results</title>
+</head>
+<body>
+    <h1>Job Search Results</h1>
+    {% if jobs %}
+        <ul>
+        {% for job in jobs %}
+            <li>
+                <strong>{{ job['title'] }}</strong> at {{ job['company'] }} <br>
+                <a href="{{ job['url'] }}" target="_blank">Apply here</a>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No jobs found matching your criteria.</p>
+    {% endif %}
+    <a href="/">Back to Search</a>
+</body>
+</html>
+

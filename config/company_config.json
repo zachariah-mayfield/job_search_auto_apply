@@ -1,0 +1,20 @@
+{
+    "companies": [
+        {
+            "name": "Google",
+            "career_url": "https://careers.google.com/jobs/results/?distance=25&location=United%20States&remote=true"
+        },
+        {
+            "name": "Navy Federal Credit Union",
+            "career_url": "https://fa-etbx-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1001/jobs?keyword=ansible&mode=job-location"
+        },
+        {
+            "name": "no name commpany",
+            "career_url": "https://fa-ddd.comm"
+        },
+        {
+            "name": "Waste Management",
+            "career_url": "https://www.wm.com/us/en/inside-wm/careers"
+        }
+    ]
+}
